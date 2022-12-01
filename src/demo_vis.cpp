@@ -33,13 +33,8 @@ void setupMujocoWorld(){
     char error[1000];
 
     // TODO - fix this hard coded path issue
-<<<<<<< HEAD
-    model = mj_loadXML("/home/davidrussell/catkin_ws/src/MuJoCo_realRobot_ROS/models/franka_emika_panda/reaching_scene.xml", NULL, error, 1000);
-    //model = mj_loadXML("/home/davidrussell/catkin_ws/src/MuJoCo_realRobot_ROS/models/old/reaching.xml", NULL, error, 1000);
-=======
     // model = mj_loadXML("/home/davidrussell/catkin_ws/src/MuJoCo_realRobot_ROS/models/franka_emika_panda/reaching_scene.xml", NULL, error, 1000);
-    model = mj_loadXML("/home/davidrussell/catkin_ws/src/MuJoCo_realRobot_ROS/models/old/reaching.xml", NULL, error, 1000);
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
+    model = mj_loadXML("/home/davidrussell/catkin_ws/src/MuJoCo_realRobot_ROS/models/franka_emika_panda/pushing_scene.xml", NULL, error, 1000);
 
     if(!model) {
         std::cout << "model xml Error" << std::endl;
@@ -108,7 +103,7 @@ int main(int argc, char **argv){
 
     // Create an instance of 
     // MuJoCo_realRobot_ROS mujocoController(true, &n);
-    mujoco_realRobot_ROS = new MuJoCo_realRobot_ROS(argc, argv, 2);
+    mujoco_realRobot_ROS = new MuJoCo_realRobot_ROS(argc, argv, 1);
 
     int counter = 0;
 
@@ -133,16 +128,10 @@ int main(int argc, char **argv){
 
         counter++;
         if(counter < 200){
-<<<<<<< HEAD
 
             //mujoco_realRobot_ROS->sendPositionsToRealRobot(desiredPos);
-=======
-            double torques[7] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-            mujoco_realRobot_ROS->sendTorquesToRealRobot(torques);
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
         }
 
-        std::cout << "test Joint diff: " << desiredPos[testJoint] - mujoco_realRobot_ROS->jointVals[testJoint] << std::endl;
 
         render();
     }

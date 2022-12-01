@@ -68,8 +68,6 @@ class MuJoCo_realRobot_ROS{
 
         void resetTorqueControl();
 
-        bool firstCallbackCalled;
-
     private:
 
         int numberOfObjects;
@@ -97,12 +95,6 @@ class MuJoCo_realRobot_ROS{
         void set_qPosVal(mjModel *m, mjData *d, int bodyId, bool freeJoint, int freeJntAxis, double val);
         void setBodyQuat(mjModel *m, mjData *d, int bodyId, Quaternionf q);
 
-<<<<<<< HEAD
-=======
-        double jointVals[7];
-        double jointSpeeds[7];
-
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
         bool haltRobot = false;
         
 };

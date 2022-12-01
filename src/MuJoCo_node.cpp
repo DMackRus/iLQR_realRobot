@@ -10,11 +10,7 @@ MuJoCo_realRobot_ROS::MuJoCo_realRobot_ROS(int argc, char **argv, int _numberOfO
     jointStates_sub = n->subscribe("joint_states", 10, &MuJoCo_realRobot_ROS::jointStates_callback, this); 
     frankaStates_sub = n->subscribe("/franka_state_controller/franka_states", 10, &MuJoCo_realRobot_ROS::frankaStates_callback, this);
 
-<<<<<<< HEAD
     torque_pub = new ros::Publisher(n->advertise<std_msgs::Float64MultiArray>("/effort_group_position_controller/command", 10));
-=======
-    torque_pub = new ros::Publisher(n->advertise<std_msgs::Float64MultiArray>("/effort_group_effort_controller/command", 1));
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
 
     numberOfObjects = _numberOfObjects;
 
@@ -22,9 +18,9 @@ MuJoCo_realRobot_ROS::MuJoCo_realRobot_ROS(int argc, char **argv, int _numberOfO
         objectTrackingList.push_back(objectTracking());
     }
 
-    // objectTrackingList[0].parent_id = "/panda_link0";
-    // objectTrackingList[0].target_id = "/ar_marker_3";
-    // objectTrackingList[0].mujoco_name = "cheezit";
+    objectTrackingList[0].parent_id = "/panda_link0";
+    objectTrackingList[0].target_id = "/ar_marker_3";
+    objectTrackingList[0].mujoco_name = "tin";
 
     // objectTrackingList[1].parent_id = "/panda_link0";
     // objectTrackingList[1].target_id = "/panda_hand_tcp";
@@ -57,9 +53,6 @@ void MuJoCo_realRobot_ROS::frankaStates_callback(const franka_msgs::FrankaState 
     for(int i = 0; i < NUM_JOINTS; i++){
         jointSpeeds[i] = msg.dq[i];
     }
-<<<<<<< HEAD
-=======
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
 }
 
 void MuJoCo_realRobot_ROS::updateMujocoData(mjModel* m, mjData* d){
@@ -75,43 +68,57 @@ void MuJoCo_realRobot_ROS::updateMujocoData(mjModel* m, mjData* d){
 
 void MuJoCo_realRobot_ROS::updateRobotState(mjModel* m, mjData* d){
     for(int i = 0; i < NUM_JOINTS; i++){
-<<<<<<< HEAD
+
         d->qpos[i] = jointVals[i];
-=======
     }
+
 }
 
 void MuJoCo_realRobot_ROS::updateScene(mjModel* m, mjData* d){
     tf::StampedTransform transform;
 
+// ----------------------------------------- temp ---------------------------------------------------
+    int cheezit_id = mj_name2id(m, mjOBJ_BODY, objectTrackingList[0].mujoco_name.c_str());
+
+    m_point bodyPos;
+
+    bodyPos(0) = 0.5;
+    bodyPos(1) = 0.0;
+    bodyPos(2) = 0.0;
+    set_BodyPosition(m, d, cheezit_id, bodyPos);
+
+    //-----------------------------------------------------------------
    
-    for(int i = 0; i < numberOfObjects; i++){
+    // for(int i = 0; i < numberOfObjects; i++){
 
-        try{
-            listener->lookupTransform(objectTrackingList[i].parent_id, objectTrackingList[i].target_id, ros::Time(0), transform);
+    //     try{
+    //         listener->lookupTransform(objectTrackingList[i].parent_id, objectTrackingList[i].target_id, ros::Time(0), transform);
 
-            int cheezit_id = mj_name2id(m, mjOBJ_BODY, objectTrackingList[i].mujoco_name.c_str());
+    //         int cheezit_id = mj_name2id(m, mjOBJ_BODY, objectTrackingList[i].mujoco_name.c_str());
 
-            m_point bodyPos;
-            bodyPos(0) = transform.getOrigin().x();
-            bodyPos(1) = transform.getOrigin().y();
-            bodyPos(2) = transform.getOrigin().z();
-            set_BodyPosition(m, d, cheezit_id, bodyPos);
+    //         m_point bodyPos;
+    //         // bodyPos(0) = transform.getOrigin().x();
+    //         // bodyPos(1) = transform.getOrigin().y();
+    //         // bodyPos(2) = transform.getOrigin().z();
+    //         bodyPos(0) = 0.5;
+    //         bodyPos(1) = 0.0;
+    //         bodyPos(2) = 0.0;
+    //         set_BodyPosition(m, d, cheezit_id, bodyPos);
             
-            float x = transform.getRotation().x();
-            float y = transform.getRotation().y();
-            float z = transform.getRotation().z();
-            float w = transform.getRotation().w();
+    //         float x = transform.getRotation().x();
+    //         float y = transform.getRotation().y();
+    //         float z = transform.getRotation().z();
+    //         float w = transform.getRotation().w();
 
-            Quaternionf q = {w, x, y, z};
-            setBodyQuat(m, d, cheezit_id, q);
+    //         Quaternionf q = {w, x, y, z};
+    //         setBodyQuat(m, d, cheezit_id, q);
 
-        }
-        catch (tf::TransformException ex){
-            std::cout << " no ar marker 3 found" << std::endl;
-            ROS_ERROR("%s",ex.what());
-        }
-    }
+    //     }
+    //     catch (tf::TransformException ex){
+    //         //std::cout << " no ar marker 3 found" << std::endl;
+    //         //ROS_ERROR("%s",ex.what());
+    //     }
+    // }
 }
 
 m_pose_quat filterObjectHistory(std::vector<m_pose_quat> objectPoses){
@@ -166,7 +173,6 @@ bool MuJoCo_realRobot_ROS::switchController(std::string controllerName){
 
 void MuJoCo_realRobot_ROS::sendTorquesToRealRobot(double torques[]){
     std_msgs::Float64MultiArray  desired_torques;
-<<<<<<< HEAD
     double jointSpeedLimits[NUM_JOINTS] = {0.6, 0.5, 0.5, 0.5, 1, 1, 1};
     double torqueLimits[NUM_JOINTS] = {10.0, 10.0, 10.0, 10.0, 5.0, 5.0, 5.0};
 
@@ -198,35 +204,7 @@ void MuJoCo_realRobot_ROS::sendTorquesToRealRobot(double torques[]){
             }
 
             desired_torques.data.push_back(safeTorque);
-            
-=======
-    double jointSpeedLimits[NUM_JOINTS] = {0.5, 0.5, 0.5, 0.5, 1, 1, 1};
-    bool jointVelsSafe = true;
-
-    if(!haltRobot){
-        std::cout << "torques Sent: " << torques[0] << ", " << torques[1] << ", " << torques[2] << ", " << torques[3] << ", " << torques[4] << ", " << torques[5] << ", " << torques[6] << ", " << std::endl;
-        for(int i = 0; i < NUM_JOINTS; i++){
-            double safeTorque = torques[i];
-
-            if(jointSpeeds[i] > jointSpeedLimits[i]){
-                std::cout << "joint " << i <<  " speed: " << jointSpeeds[i] << std::endl;
-                std::cout << "safety vel triggered" << std::endl;
-                haltRobot = true;
-                safeTorque = 0.0;
-            }
-
-            if(jointSpeeds[i] < -jointSpeedLimits[i]){
-                std::cout << "joint " << i <<  " speed: " << jointSpeeds[i] << std::endl;
-                std::cout << "safety vel triggered" << std::endl;
-                haltRobot = true;
-                safeTorque = 0.0;
-            }
-
-            desired_torques.data.push_back(safeTorque);
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
         }
-        //std::cout << "torque 0: " << desired_torques.data[0] << std::endl;
-        torque_pub->publish(desired_torques);
     }
     else{
         for(int i = 0; i < NUM_JOINTS; i++){
@@ -238,7 +216,6 @@ void MuJoCo_realRobot_ROS::sendTorquesToRealRobot(double torques[]){
     ros::spinOnce();
 }
 
-<<<<<<< HEAD
 void MuJoCo_realRobot_ROS::sendPositionsToRealRobot(double positions[]){
     std_msgs::Float64MultiArray  desired_positions;
     double jointSpeedLimits[NUM_JOINTS] = {0.6, 0.5, 0.5, 0.5, 1, 1, 1};
@@ -274,16 +251,6 @@ void MuJoCo_realRobot_ROS::sendPositionsToRealRobot(double positions[]){
     }
 
     ros::spinOnce();
-=======
-        torque_pub->publish(desired_torques);
-    }
-    else{
-        for(int i = 0; i < NUM_JOINTS; i++){
-            desired_torques.data.push_back(0.0);
-        }
-        torque_pub->publish(desired_torques);
-    }
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
 }
 
 // void MuJoCo_realRobot_ROS::resetTorqueControl(){

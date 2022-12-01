@@ -7,11 +7,7 @@
 
 
 // Different operating modes for my code
-<<<<<<< HEAD
-#define RUN_ILQR                1      // RUN_ILQR - runs a simple iLQR optimisation for given task
-=======
-#define RUN_ILQR                1       // RUN_ILQR - runs a simple iLQR optimisation for given task
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
+#define RUN_ILQR                1     // RUN_ILQR - runs a simple iLQR optimisation for given task
 
 extern MujocoController *globalMujocoController;
 extern mjModel* model;						// MuJoCo model
@@ -51,18 +47,14 @@ void sendTrajecToRealRobot();
 
 int main(int argc, char **argv){
 
-<<<<<<< HEAD
     bool simulateFinal = true;
     bool realRobot;
 
-=======
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
     modelTranslator = new frankaModel();
     initMujoco(modelTranslator->taskNumber, 0.004);
     modelTranslator->init(model);
 
-    mujoco_realRobot_ROS = new MuJoCo_realRobot_ROS(argc, argv, 0);
-<<<<<<< HEAD
+    mujoco_realRobot_ROS = new MuJoCo_realRobot_ROS(argc, argv, 1);
 
     ros::param::get("/realRobot", realRobot);
     if(realRobot){
@@ -70,9 +62,6 @@ int main(int argc, char **argv){
     }
 
     mujoco_realRobot_ROS->switchController("effort_group_position_controller");
-=======
-    mujoco_realRobot_ROS->switchController("effort_group_effort_controller");
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
 
     d_init_test = mj_makeData(model);
 
@@ -84,8 +73,9 @@ int main(int argc, char **argv){
 
     m_state startingState = modelTranslator->returnState(d_init_test);
 
+    cout << "starting state: " << startingState << endl;
+
     X_desired = startingState.replicate(1, 1);
-<<<<<<< HEAD
 
     X_desired(0) = 0.0;
     X_desired(1) = 0.0;
@@ -94,10 +84,9 @@ int main(int argc, char **argv){
     X_desired(4) = 0.0;
     X_desired(5) = 1.95;
     X_desired(6) = 0.75;
-=======
-    X_desired(0) += 0.1;
-    X_desired(5) += 0.1;
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
+
+    X_desired(7) = 0.8;
+    X_desired(8) = 0.0;
 
     // Load initial state into main data
     cpMjData(model, mdata, d_init_test);
@@ -135,30 +124,18 @@ int main(int argc, char **argv){
             float milliiLQRTime = iLQRDur.count()/1000;
 
         }
-<<<<<<< HEAD
         if(simulateFinal){
             render();
         }
         else{
             sendTrajecToRealRobot();
         }
-=======
-
-        render();
-        //sendTrajecToRealRobot();
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
     }
     // Just want to test physics simulator things manually
     else{
 
         optimiser = new iLQR(model, mdata, modelTranslator, globalMujocoController);
 
-<<<<<<< HEAD
-=======
-        X_desired << 0, 0, 0, 0, 0, 0, 0,
-                        0, 0, 0, 0, 0, 0, 0;
-
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
         optimiser->resetInitialStates(d_init_test, X_desired);
 
         simpleTest();
@@ -185,7 +162,6 @@ void updateStartGoalAndData(){
 
 void sendTrajecToRealRobot(){
     int controlCounter = 0;
-<<<<<<< HEAD
     const int realControlsPerSim = 4;
     int realControlsCounter = 0;
 
@@ -236,7 +212,6 @@ void sendTrajecToRealRobot(){
                 cout << "state diff: " << stateDiff << endl;
 
             }
-            
         }
 
         // Visualise curent robot state
@@ -254,41 +229,6 @@ void sendTrajecToRealRobot(){
         // glfwPollEvents();
 
         loop_rate.sleep();
-=======
-
-    cpMjData(model, mdata, d_init_test);
-
-    while(ros::ok()){
-
-        mujoco_realRobot_ROS->updateMujocoData(model, mdata);
-        mj_forward(model, mdata);
-        m_ctrl nextControl = optimiser->returnDesiredControl(controlCounter, true);
-
-        double torques[7];
-        for(int i = 0; i < 7; i++){
-            //std::cout << "next control desired: " << nextControl(1) << " bias force: " << mdata->qfrc_bias[1] << std::endl;
-            torques[i] = nextControl(i) - mdata->qfrc_bias[i];
-
-        }
-
-        mujoco_realRobot_ROS->sendTorquesToRealRobot(torques);
-
-        // get framebuffer viewport
-        mjrRect viewport = { 0, 0, 0, 0 };
-        glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
-
-        // update scene and render
-        mjv_updateScene(model, mdata, &opt, NULL, &cam, mjCAT_ALL, &scn);
-        mjr_render(viewport, &scn, &con);
-
-        // swap OpenGL buffers (blocking call due to v-sync)
-        glfwSwapBuffers(window);
-
-        // process pending GUI events, call GLFW callbacks
-        glfwPollEvents();
-
-        controlCounter++;
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
 
     }
 }
@@ -325,30 +265,22 @@ void initControls(){
     m_ctrl lastControl;
     lastControl.setZero();
     int jerkLimit = 1;
-<<<<<<< HEAD
 
     m_state startState = modelTranslator->returnState(mdata);
     m_state stateDiff = X_desired - startState;
     m_state currentStateDesired = startState;
 
-=======
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
     for(int i = 0; i <= MUJ_STEPS_HORIZON_LENGTH; i++){
 
         m_state X_diff;
         m_state X = modelTranslator->returnState(mdata);
         m_ctrl nextControl;
         X_diff = X_desired - X;
-<<<<<<< HEAD
-=======
-        int K[7] = {80, 80, 80, 80, 20, 20, 20};
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
 
         testInitControls.push_back(m_ctrl());
         grippersOpen.push_back(bool());
         grippersOpen[i] = false;
 
-<<<<<<< HEAD
         for(int i = 0; i < 7; i++){
             currentStateDesired(i) += (stateDiff(i) / MUJ_STEPS_HORIZON_LENGTH);
 
@@ -371,30 +303,6 @@ void initControls(){
             
             //nextControl(k) += mdata->qfrc_bias[k];
 
-=======
-        nextControl(0) = X_diff(0) * K[0];
-        nextControl(1) = X_diff(1) * K[1];
-        nextControl(2) = X_diff(2) * K[2];
-        nextControl(3) = X_diff(3) * K[3];
-        nextControl(4) = X_diff(4) * K[4];
-        nextControl(5) = X_diff(5) * K[5];
-        nextControl(6) = X_diff(6) * K[6];
-
-        for(int k = 0; k < NUM_CTRL; k++){
-
-            if(nextControl(k) - lastControl(k) > jerkLimit){
-                nextControl(k) = lastControl(k) + jerkLimit;
-            }
-
-            if(nextControl(k) - lastControl(k) < -jerkLimit){
-                nextControl(k) = lastControl(k) - jerkLimit;
-            }
-
-            if(nextControl(k) > modelTranslator->torqueLims[k]) nextControl(k) = modelTranslator->torqueLims[k];
-            if(nextControl(k) < -modelTranslator->torqueLims[k]) nextControl(k) = -modelTranslator->torqueLims[k];
-
-            //nextControl(k) = X_diff(k) * K[i];
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
             testInitControls[i](k) = nextControl(k);
             mdata->ctrl[k] = testInitControls[i](k);
 
@@ -402,13 +310,6 @@ void initControls(){
 
         lastControl = nextControl.replicate(1,1);
 
-<<<<<<< HEAD
-=======
-//        cout << "x_diff[i]" << X_diff << endl;
-//        cout << "next control: " << nextControl << endl;
-//        cout << "testInitControls[i]" << testInitControls[i] << endl;
-
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
         for(int j = 0; j < 1; j++){
             mj_step(model, mdata);
         }
@@ -418,157 +319,222 @@ void initControls(){
 #endif
 
 #ifdef OBJECT_PUSHING
-void initControls() {
-    cpMjData(model, mdata, d_init_test);
+// void initControls() {
+//     cpMjData(model, mdata, d_init_test);
 
-    //const std::string endEffecName = "franka_gripper";
-    //panda0_leftfinger
-    const std::string EE_Name = "franka_gripper";
-    const std::string goalName = "goal";
+//     const std::string EE_Name = "hand";
+//     const std::string goalName = "tin";
 
-    int EE_id = mj_name2id(model, mjOBJ_BODY, EE_Name.c_str());
-    int goal_id = mj_name2id(model, mjOBJ_BODY, goalName.c_str());
+//     int EE_id = mj_name2id(model, mjOBJ_BODY, EE_Name.c_str());
+//     int goal_id = mj_name2id(model, mjOBJ_BODY, goalName.c_str());
 
-    m_pose startPose = globalMujocoController->returnBodyPose(model, mdata, EE_id);
-    m_quat startQuat = globalMujocoController->returnBodyQuat(model, mdata, EE_id);
+//     m_pose startPose = globalMujocoController->returnBodyPose(model, mdata, EE_id);
+//     m_quat startQuat = globalMujocoController->returnBodyQuat(model, mdata, EE_id);
 
-    // TODO hard coded - get it programmatically? - also made it slightly bigger so trajectory has room to improve
-    float cylinder_radius = 0.04;
-    float x_cylinder0ffset = cylinder_radius * sin(PI/4);
-    float y_cylinder0ffset = cylinder_radius * cos(PI/4);
+//     // TODO hard coded - get it programmatically? - also made it slightly bigger so trajectory has room to improve
+//     float cylinder_radius = 0.04;
+//     float x_cylinder0ffset = cylinder_radius * sin(PI/4);
+//     float y_cylinder0ffset = cylinder_radius * cos(PI/4);
 
-    float endPointX = X_desired(7) - x_cylinder0ffset;
-    float endPointY;
-    if(X_desired(8) - startPose(0) > 0){
-        endPointY = X_desired(8) - y_cylinder0ffset;
-    }
-    else{
-        endPointY = X_desired(8) + y_cylinder0ffset;
-    }
+//     float endPointX = X_desired(7) - x_cylinder0ffset;
+//     float endPointY;
+//     if(X_desired(8) - startPose(0) > 0){
+//         endPointY = X_desired(8) - y_cylinder0ffset;
+//     }
+//     else{
+//         endPointY = X_desired(8) + y_cylinder0ffset;
+//     }
 
-    float cylinderObjectX = X0(7);
-    float cylinderObjectY = X0(8);
-    float intermediatePointX;
-    float intermediatePointY;
+//     float cylinderObjectX = X0(7);
+//     float cylinderObjectY = X0(8);
+//     float intermediatePointX;
+//     float intermediatePointY;
 
-    float angle = atan2(endPointY - cylinderObjectY, endPointX - cylinderObjectX);
+//     float angle = atan2(endPointY - cylinderObjectY, endPointX - cylinderObjectX);
 
-    if(endPointY > cylinderObjectY){
-        angle += 0.4;
-    }
-    else{
-        angle -= 0.4;
-    }
+//     if(endPointY > cylinderObjectY){
+//         angle += 0.4;
+//     }
+//     else{
+//         angle -= 0.4;
+//     }
 
-    float h = 0.15;
+//     float h = 0.15;
 
-    float deltaX = h * cos(angle);
-    float deltaY = h * sin(angle);
+//     float deltaX = h * cos(angle);
+//     float deltaY = h * sin(angle);
 
-    // Calculate intermediate waypoint to position end effector behind cube such that it can be pushed to desired goal position
-//    if(X_desired(8) - startPose(0) > 0){
-//        intermediatePointY = cylinderObjectY + deltaY;
-//    }
-//    else{
-//        intermediatePointY = cylinderObjectY - deltaY;
-//    }
-    intermediatePointY = cylinderObjectY - deltaY;
-    intermediatePointX = cylinderObjectX - deltaX;
+//     // Calculate intermediate waypoint to position end effector behind cube such that it can be pushed to desired goal position
+// //    if(X_desired(8) - startPose(0) > 0){
+// //        intermediatePointY = cylinderObjectY + deltaY;
+// //    }
+// //    else{
+// //        intermediatePointY = cylinderObjectY - deltaY;
+// //    }
+//     intermediatePointY = cylinderObjectY - deltaY;
+//     intermediatePointX = cylinderObjectX - deltaX;
 
-    intermediatePoint(0) = intermediatePointX;
-    intermediatePoint(1) = intermediatePointY;
+//     intermediatePoint(0) = intermediatePointX;
+//     intermediatePoint(1) = intermediatePointY;
 
-//    if(endPointY - cylinderObjectY > 0){
-//        intermediatePointY -= 0.1;
-//    }
-//    else{
-//        intermediatePointY += 0.1;
-//    }
+// //    if(endPointY - cylinderObjectY > 0){
+// //        intermediatePointY -= 0.1;
+// //    }
+// //    else{
+// //        intermediatePointY += 0.1;
+// //    }
 
-    float x_diff = intermediatePointX - startPose(0);
-    float y_diff = intermediatePointY - startPose(1);
+//     float x_diff = intermediatePointX - startPose(0);
+//     float y_diff = intermediatePointY - startPose(1);
 
-    m_point initPath[MUJ_STEPS_HORIZON_LENGTH];
-    initPath[0](0) = startPose(0);
-    initPath[0](1) = startPose(1);
-    initPath[0](2) = startPose(2);
+//     m_point initPath[MUJ_STEPS_HORIZON_LENGTH];
+//     initPath[0](0) = startPose(0);
+//     initPath[0](1) = startPose(1);
+//     initPath[0](2) = startPose(2);
 
-    int splitIndex = 1000;
+//     int splitIndex = 1000;
 
-    for (int i = 0; i < 1000; i++) {
-        initPath[i + 1](0) = initPath[i](0) + (x_diff / splitIndex);
-        initPath[i + 1](1) = initPath[i](1) + (y_diff / splitIndex);
-        initPath[i + 1](2) = initPath[i](2);
-    }
+//     for (int i = 0; i < 1000; i++) {
+//         initPath[i + 1](0) = initPath[i](0) + (x_diff / splitIndex);
+//         initPath[i + 1](1) = initPath[i](1) + (y_diff / splitIndex);
+//         initPath[i + 1](2) = initPath[i](2);
+//     }
 
-    x_diff = endPointX - intermediatePointX;
-    y_diff = endPointY - intermediatePointY;
+//     x_diff = endPointX - intermediatePointX;
+//     y_diff = endPointY - intermediatePointY;
 
-    // Deliberately make initial;isation slightly worse so trajectory optimiser can do something
-    for (int i = splitIndex; i < MUJ_STEPS_HORIZON_LENGTH - 1; i++) {
-        initPath[i + 1](0) = initPath[i](0) + (x_diff / (5000 - splitIndex));
-        initPath[i + 1](1) = initPath[i](1) + (y_diff / (5000 - splitIndex));
-        initPath[i + 1](2) = initPath[i](2);
-    }
+//     // Deliberately make initial;isation slightly worse so trajectory optimiser can do something
+//     // for (int i = splitIndex; i < MUJ_STEPS_HORIZON_LENGTH - 1; i++) {
+//     //     initPath[i + 1](0) = initPath[i](0) + (x_diff / (5000 - splitIndex));
+//     //     initPath[i + 1](1) = initPath[i](1) + (y_diff / (5000 - splitIndex));
+//     //     initPath[i + 1](2) = initPath[i](2);
+//     // }
 
 //    for (int i = splitIndex; i < MUJ_STEPS_HORIZON_LENGTH - 1; i++) {
 //        initPath[i + 1](0) = initPath[i](0) + (x_diff / (MUJ_STEPS_HORIZON_LENGTH - splitIndex));
 //        initPath[i + 1](1) = initPath[i](1) + (y_diff / (MUJ_STEPS_HORIZON_LENGTH - splitIndex));
 //        initPath[i + 1](2) = initPath[i](2);
 //    }
+   
+//     m_state currentState = modelTranslator->returnState(mdata);
+//     m_ctrl lastDesiredPos;
 
-    for (int i = 0; i <= MUJ_STEPS_HORIZON_LENGTH; i++) {
+//     for(int i = 0; i < NUM_CTRL; i++){
+//         lastDesiredPos(i) = currentState(i);
+//     }
 
-        m_pose currentEEPose = globalMujocoController->returnBodyPose(model, mdata, EE_id);
-        m_quat currentQuat = globalMujocoController->returnBodyQuat(model, mdata, EE_id);
+//     testInitControls.push_back(m_ctrl());
+//     grippersOpen.push_back(bool());
+//     grippersOpen[0] = false;
 
-        m_quat invQuat = globalMujocoController->invQuat(currentQuat);
-        m_quat quatDiff = globalMujocoController->multQuat(startQuat, invQuat);
+//     for (int k = 0; k < NUM_CTRL; k++) {
 
-        m_point axisDiff = globalMujocoController->quat2Axis(quatDiff);
+//         testInitControls[0](k) = lastDesiredPos(k);
+//         mdata->ctrl[k] = testInitControls[0](k);
+//     }
 
-        m_pose differenceFromPath;
-        float gains[6] = {10000, 10000, 10000, 500, 500, 500};
-        for (int j = 0; j < 3; j++) {
-            differenceFromPath(j) = initPath[i](j) - currentEEPose(j);
-            differenceFromPath(j + 3) = axisDiff(j);
-        }
+//     mj_step(model, mdata);
 
-//        cout << "current path point: " << initPath[i] << endl;
-//        cout << "currentEE Pose: " << currentEEPose << endl;
-//        cout << "diff from path: " << differenceFromPath << endl;
+//     for (int i = 1; i <= MUJ_STEPS_HORIZON_LENGTH; i++) {
 
-        m_pose desiredEEForce;
+//         testInitControls.push_back(m_ctrl());
+//         grippersOpen.push_back(bool());
+//         grippersOpen[i] = false;
 
-        for (int j = 0; j < 6; j++) {
-            desiredEEForce(j) = differenceFromPath(j) * gains[j];
-        }
+//         for (int k = 0; k < NUM_CTRL; k++) {
 
-        //cout << "desiredEEForce " << desiredEEForce << endl;
+//             testInitControls[i](k) = lastDesiredPos(k);
+//             mdata->ctrl[k] = testInitControls[i](k);
+//         }
 
-        MatrixXd Jac = globalMujocoController->calculateJacobian(model, mdata, EE_id);
+//         m_pose currentEEPose = globalMujocoController->returnBodyPose(model, mdata, EE_id);
+//         m_quat currentQuat = globalMujocoController->returnBodyQuat(model, mdata, EE_id);
 
-        MatrixXd Jac_t = Jac.transpose();
-        MatrixXd Jac_inv = Jac.completeOrthogonalDecomposition().pseudoInverse();
+//         m_quat invQuat = globalMujocoController->invQuat(currentQuat);
+//         m_quat quatDiff = globalMujocoController->multQuat(startQuat, invQuat);
 
-        m_ctrl desiredControls;
+//         m_point axisDiff = globalMujocoController->quat2Axis(quatDiff);
 
-        desiredControls = Jac_inv * desiredEEForce;
+//         m_pose differenceFromPath;
+//         for (int j = 0; j < 3; j++) {
+//             differenceFromPath(j) = initPath[i](j) - initPath[i-1](j);
+//             differenceFromPath(j + 3) = 0;
+//         }
+
+//         MatrixXd Jac = globalMujocoController->calculateJacobian(model, mdata, EE_id);
+
+//         MatrixXd Jac_t = Jac.transpose();
+//         MatrixXd Jac_inv = Jac.completeOrthogonalDecomposition().pseudoInverse();
+
+//         m_ctrl delta_q = Jac_inv * differenceFromPath;
+
+//         lastDesiredPos -= delta_q;
+
+//         if(i % 50 == 0){
+//             cout << "------------------------------------------------------------------------" << endl;
+//             cout << "differenceFromPath" << differenceFromPath << endl;
+//             cout << "jac: " << Jac_inv << endl;
+//             cout << "delta q " << delta_q << endl;
+//             cout << "test init controls  " << i << ": " << testInitControls[i] << endl;
+//         }
+
+// // //        cout << "current path point: " << initPath[i] << endl;
+// // //        cout << "currentEE Pose: " << currentEEPose << endl;
+// // //        cout << "diff from path: " << differenceFromPath << endl;
+
+// //         m_pose desiredEEForce;
+
+// //         for (int j = 0; j < 6; j++) {
+// //             desiredEEForce(j) = differenceFromPath(j) * gains[j];
+// //         }
+
+// //         //cout << "desiredEEForce " << desiredEEForce << endl;
+
+        
+
+// //         m_ctrl desiredControls;
+
+// //         desiredControls = Jac_inv * desiredEEForce;
+
+//         for (int j = 0; j < 1; j++) {
+//             mj_step(model, mdata);
+//         }
+//     }
+// }
+
+void initControls(){
+
+    m_ctrl finalPos;
+    finalPos << -0.16, 0.6, 0.120, -2.2, -0.08, 2.67, 0.723;
+
+    m_ctrl start;
+    m_state currentState = modelTranslator->returnState(mdata);
+
+    for(int i = 0; i < NUM_CTRL; i++){
+        start(i) = currentState(i);
+    }
+
+    m_ctrl diff = (finalPos - start) / MUJ_STEPS_HORIZON_LENGTH;
+
+    m_ctrl nextPos = start.replicate(1, 1);
+
+
+    for(int i = 0; i < MUJ_STEPS_HORIZON_LENGTH; i++){
 
         testInitControls.push_back(m_ctrl());
         grippersOpen.push_back(bool());
-        grippersOpen[i] = false;
-
+        grippersOpen[0] = false;
 
         for (int k = 0; k < NUM_CTRL; k++) {
 
-            testInitControls[i](k) = desiredControls(k) + mdata->qfrc_bias[k];
+            testInitControls[i](k) = nextPos(k);
             mdata->ctrl[k] = testInitControls[i](k);
         }
 
-        for (int j = 0; j < 1; j++) {
-            mj_step(model, mdata);
-        }
+        nextPos += diff;
+
+        mj_step(model, mdata);
+
     }
 }
 #endif

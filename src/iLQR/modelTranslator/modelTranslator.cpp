@@ -39,7 +39,6 @@ frankaModel::frankaModel(){
 #ifdef REACHING_TASK
     taskNumber = 1;
 
-<<<<<<< HEAD
     stateNames[0] = "link1";
     stateNames[1] = "link2";
     stateNames[2] = "link3";
@@ -59,27 +58,6 @@ frankaModel::frankaModel(){
     armControlCosts = 0;
     double armStateCosts = 1;
     double armVelCosts = 5;
-=======
-    // stateNames[0] = "link1";
-    // stateNames[1] = "link2";
-    // stateNames[2] = "link3";
-    // stateNames[3] = "link4";
-    // stateNames[4] = "link5";
-    // stateNames[5] = "link6";
-    // stateNames[6] = "link7";
-
-    stateNames[0] = "panda0_link1";
-    stateNames[1] = "panda0_link2";
-    stateNames[2] = "panda0_link3";
-    stateNames[3] = "panda0_link4";
-    stateNames[4] = "panda0_link5";
-    stateNames[5] = "panda0_link6";
-    stateNames[6] = "panda0_link7";
-
-    armControlCosts = 0;
-    double armStateCosts = 1;
-    double armVelCosts = 3;
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
 
     for(int i = 0; i < NUM_CTRL; i++){
         R.diagonal()[i] = armControlCosts;
@@ -98,14 +76,14 @@ frankaModel::frankaModel(){
 #ifdef OBJECT_PUSHING_TASK
     taskNumber = 2;
     stateNames.push_back(std::string());
-    stateNames[0] = "panda0_link1";
-    stateNames[1] = "panda0_link2";
-    stateNames[2] = "panda0_link3";
-    stateNames[3] = "panda0_link4";
-    stateNames[4] = "panda0_link5";
-    stateNames[5] = "panda0_link6";
-    stateNames[6] = "panda0_link7";
-    stateNames[7] = "goal";
+    stateNames[0] = "link1";
+    stateNames[1] = "link2";
+    stateNames[2] = "link3";
+    stateNames[3] = "link4";
+    stateNames[4] = "link5";
+    stateNames[5] = "link6";
+    stateNames[6] = "link7";
+    stateNames[7] = "tin";
 
     armControlCosts = 0;
     double armStateCosts = 0;
@@ -114,7 +92,7 @@ frankaModel::frankaModel(){
     for(int i = 0; i < NUM_CTRL; i++){
         R.diagonal()[i] = armControlCosts;
         //J.diagonal()[i] = 0.0007;
-        J.diagonal()[i] = 0.0007;
+        J.diagonal()[i] = 0;
         stateIndexToStateName[i] = i;
         stateIndexToFreeJntIndex[i] = 0;
     }
@@ -254,7 +232,7 @@ void frankaModel::costDerivatives(mjData *d, Ref<m_state> l_x, Ref<m_state_state
     l_xx = 2 * Q;
 
     l_u = (2 * R * U) + (2 * J * U_diff);
-    //l_uu = (2 * R) + (2 * J);
+    l_uu = (2 * R) + (2 * J);
 }
 
 // set the state of a mujoco data object as per this model
@@ -560,7 +538,10 @@ void frankaModel::costDerivatives(mjData *d, Ref<m_state> l_x, Ref<m_state_state
     l_xx = 2 * Q_scaled;
 
     l_u = (2 * R * U) + (2 * J * U_diff);
-    //l_uu = (2 * R) + (2 * J);
+    l_uu.setZero();
+    for(int i = 0; i < NUM_CTRL; i++){
+        l_uu(i, i) = 2 * R.diagonal()[i];
+    }
 }
 
 // set the state of a mujoco data object as per this model
@@ -994,11 +975,7 @@ m_state frankaModel::generateRandomGoalState(m_state startState, mjData *d){
 // Set the controls of a mujoco data object
 void frankaModel::setControls(mjData *d, m_ctrl U, bool grippersOpen){
     for(int i = 0; i < NUM_CTRL; i++){
-<<<<<<< HEAD
-        d->ctrl[i] = U(i);// + d->qfrc_bias[i];
-=======
         d->ctrl[i] = U(i);
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
     }
 
 #ifndef DOUBLE_PENDULUM

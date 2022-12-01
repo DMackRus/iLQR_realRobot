@@ -1,4 +1,4 @@
 <launch>
-    <param name= "realRobot" value="true"/>
+    <param name= "realRobot" value="false"/>
     <node name="iLQR_demo" pkg="MuJoCo_realRobot_ROS" type="iLQR_MuJoCo_realRobot" respawn="false" output="screen"/>
 </launch>

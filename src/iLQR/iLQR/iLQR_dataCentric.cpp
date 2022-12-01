@@ -400,6 +400,14 @@ void iLQR::getDerivativesDynamically(){
         modelTranslator->costDerivatives(dArray[i], l_x[i], l_xx[i], l_u[i], l_uu[i], i, MUJ_STEPS_HORIZON_LENGTH, lastControl);
     }
 
+//     for(int i = 0; i < 3; i++){
+//         cout << "timestep: " << evaluationWaypoints[i] << endl;
+//        cout << "A " << A[i] << endl;
+//        cout << "B " << B[i] << endl;
+//        m_state test = modelTranslator->returnState(dArray[i]);
+
+//    }
+
     l_xx[MUJ_STEPS_HORIZON_LENGTH] = l_xx[MUJ_STEPS_HORIZON_LENGTH - 1].replicate(1,1);
     l_x[MUJ_STEPS_HORIZON_LENGTH] = l_x[MUJ_STEPS_HORIZON_LENGTH - 1].replicate(1,1);
 }
@@ -447,11 +455,12 @@ void iLQR::getDerivativesStatically(){
     }
 
 
-//    for(int i = 0; i < 3; i++){
-//        cout << "A " << A[i] << endl;
-//        m_state test = modelTranslator->returnState(dArray[i]);
+   for(int i = 1000; i < 1003; i++){
+       cout << "A " << A[i] << endl;
+       cout << "B " << B[i] << endl;
+       m_state test = modelTranslator->returnState(dArray[i]);
 
-//    }
+   }
 
     auto iLQRStop = high_resolution_clock::now();
     auto iLQRDur = duration_cast<microseconds>(iLQRStop - iLQRStart);
@@ -501,10 +510,10 @@ void iLQR::smoothAMatrices(){
         }
     }
 
-    for(int i = 0; i < ilqr_horizon_length; i++){
+    // for(int i = 0; i < ilqr_horizon_length; i++){
 
 
-    }
+    // }
 }
 
 
@@ -717,15 +726,17 @@ bool iLQR::backwardsPass_Quu_reg(){
 
         V_xx = (V_xx + V_xx.transpose()) / 2;
 
-//        cout << "l_x " << l_x[t] << endl;
-//        cout << "l_xx " << l_xx[t] << endl;
-//        cout << "Q_ux " << Q_ux << endl;
-//        cout << "f_u[t] " << f_u[t] << endl;
-//        cout << "Q_uu " << Q_uu << endl;
-//        cout << "Q_uu_inv " << Q_uu_inv << endl;
-//        cout << "V_xx " << V_xx << endl;
-//        cout << "V_x " << V_x << endl;
-//        cout << "K[t] " << K[t] << endl;
+        // if(t > 2997){
+        //     cout << "l_x " << l_x[t] << endl;
+        //     cout << "l_uu " << l_uu[t] << endl;
+        //     cout << "Q_ux " << Q_ux << endl;
+        //     cout << "f_u[t] " << f_u[t] << endl;
+        //     cout << "Q_uu " << Q_uu << endl;
+        //     cout << "Q_uu_inv " << Q_uu_inv << endl;
+        //     cout << "V_xx " << V_xx << endl;
+        //     cout << "V_x " << V_x << endl;
+        //     cout << "K[t] " << K[t] << endl;
+        // }
     }
 
     return true;
@@ -852,14 +863,18 @@ float iLQR::forwardsPass(float oldCost){
                 }
 
                 // Clamp torques within torque limits
-                for(int k = 0; k < NUM_CTRL; k++){
-                    if(U_new[(t * num_mj_steps_per_control) + i](k) > modelTranslator->torqueLims[k]) U_new[(t * num_mj_steps_per_control) + i](k) = modelTranslator->torqueLims[k];
-                    if(U_new[(t * num_mj_steps_per_control) + i](k) < -modelTranslator->torqueLims[k]) U_new[(t * num_mj_steps_per_control) + i](k) = -modelTranslator->torqueLims[k];
-                }
+                // for(int k = 0; k < NUM_CTRL; k++){
+                //     if(U_new[(t * num_mj_steps_per_control) + i](k) > modelTranslator->torqueLims[k]) U_new[(t * num_mj_steps_per_control) + i](k) = modelTranslator->torqueLims[k];
+                //     if(U_new[(t * num_mj_steps_per_control) + i](k) < -modelTranslator->torqueLims[k]) U_new[(t * num_mj_steps_per_control) + i](k) = -modelTranslator->torqueLims[k];
+                // }
 
-//                cout << "old control: " << endl << U_old[(t * num_mj_steps_per_control) + i] << endl;
-//                cout << "state feedback" << endl << stateFeedback << endl;
-//                cout << "new control: " << endl << U_new[(t * num_mj_steps_per_control) + i] << endl;
+                // Clamp position limits between min and max
+                // for(int k = 0; k < NUM_CTRL; k++){
+                //     if(U_new[(t * num_mj_steps_per_control) + i](k) > modelTranslator->jointLimsMax[k]) U_new[(t * num_mj_steps_per_control) + i](k) = modelTranslator->jointLimsMax[k];
+                //     if(U_new[(t * num_mj_steps_per_control) + i](k) < modelTranslator->jointLimsMin[k]) U_new[(t * num_mj_steps_per_control) + i](k) = modelTranslator->jointLimsMin[k];
+                // }
+
+               
 
                 modelTranslator->setControls(mdata, U_new[(t * num_mj_steps_per_control) + i], grippersOpen_iLQR[(t * num_mj_steps_per_control) + i]);
 
@@ -874,6 +889,27 @@ float iLQR::forwardsPass(float oldCost){
                 newCost += (currentCost * MUJOCO_DT);
 
                 modelTranslator->stepModel(mdata, 1);
+
+                if(t % 1 == 0){
+                    mjrRect viewport = { 0, 0, 0, 0 };
+                    glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
+
+                    // update scene and render
+                    mjv_updateScene(model, mdata, &opt, NULL, &cam, mjCAT_ALL, &scn);
+                    mjr_render(viewport, &scn, &con);
+
+                    // swap OpenGL buffers (blocking call due to v-sync)
+                    glfwSwapBuffers(window);
+
+                    // process pending GUI events, call GLFW callbacks
+                    glfwPollEvents();
+
+                    cout << "old control: " << endl << U_old[(t * num_mj_steps_per_control) + i] << endl;
+                    cout << "state feedback" << endl << feedBackGain << endl;
+                    cout << "new control: " << endl << U_new[(t * num_mj_steps_per_control) + i] << endl;
+                }
+
+                
             }
         }
 
@@ -961,12 +997,9 @@ bool iLQR::checkForConvergence(float newCost, float oldCost){
         //cubeTermPos(0) = cubeX;
         //cubeTermPos(1) = cubeY;
         cout << "average time linearising " << linTimeSum / numIterations << endl;
-<<<<<<< HEAD
 
         m_state finalDiff = terminalState - modelTranslator->X_desired;
         cout << "Final state diff: " << finalDiff << std::endl;
-=======
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
     }
 
     // store new controls

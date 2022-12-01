@@ -175,13 +175,8 @@ void setupMujocoWorld(int taskNumber, double timestep){
 
     cout << "before loading model" << endl;
 
-<<<<<<< HEAD
-    model = mj_loadXML("/home/davidrussell/catkin_ws/src/MuJoCo_realRobot_ROS/models/franka_emika_panda/reaching_scene.xml", NULL, error, 1000);
-    //model = mj_loadXML("/home/davidrussell/catkin_ws/src/MuJoCo_realRobot_ROS/models/old/reaching.xml", NULL, error, 1000);
-=======
-    //model = mj_loadXML("/home/davidrussell/catkin_ws/src/MuJoCo_realRobot_ROS/models/franka_emika_panda/reaching_scene.xml", NULL, error, 1000);
-    model = mj_loadXML("/home/davidrussell/catkin_ws/src/MuJoCo_realRobot_ROS/models/old/reaching.xml", NULL, error, 1000);
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
+    // model = mj_loadXML("/home/davidrussell/catkin_ws/src/MuJoCo_realRobot_ROS/models/franka_emika_panda/reaching_scene.xml", NULL, error, 1000);
+     model = mj_loadXML("/home/davidrussell/catkin_ws/src/MuJoCo_realRobot_ROS/models/franka_emika_panda/pushing_scene.xml", NULL, error, 1000);
 
     model->opt.timestep = timestep;
 
@@ -252,7 +247,6 @@ void render(){
         mjtNum simstart = mdata->time;
         while (mdata->time - simstart < 1.0 / 60.0){
             nextControl = optimiser->returnDesiredControl(controlNum, showFinalControls);
-<<<<<<< HEAD
 
             optimiser->modelTranslator->setControls(mdata, nextControl, false);
 
@@ -269,23 +263,6 @@ void render(){
                     cout << "speed limit borken, joint " << i << " ,vel: " << mdata->qvel[i] << endl;   
                 }
             }
-=======
-            for(int k = 0; k < NUM_CTRL; k++){
-                mdata->ctrl[k] = nextControl(k);
-            }
-
-            if(grippersOpen[controlNum]){
-                mdata->ctrl[7] = GRIPPERS_OPEN;
-                mdata->ctrl[8] = GRIPPERS_OPEN;
-            }
-            else{
-                mdata->ctrl[7] = GRIPPERS_CLOSED;
-                mdata->ctrl[8] = GRIPPERS_CLOSED;
-            }
-
-            mj_step(model, mdata);
-
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
 
             controlNum++;
 
@@ -307,12 +284,6 @@ void render(){
             }
         }
 
-<<<<<<< HEAD
-        // void mjr_overlay(int font, int gridpos, mjrRect viewport,
-        //          const char* overlay, const char* overlay2, const mjrContext* con);
-
-=======
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
         // get framebuffer viewport
         mjrRect viewport = { 0, 0, 0, 0 };
         glfwGetFramebufferSize(window, &viewport.width, &viewport.height);
@@ -321,7 +292,6 @@ void render(){
         mjv_updateScene(model, mdata, &opt, NULL, &cam, mjCAT_ALL, &scn);
         mjr_render(viewport, &scn, &con);
 
-<<<<<<< HEAD
         mjrRect rect{0, 0, 100, 100};
         mjr_rectangle(rect, 0, 0, 0, 0);
 
@@ -334,8 +304,6 @@ void render(){
 
         
 
-=======
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
         // swap OpenGL buffers (blocking call due to v-sync)
         glfwSwapBuffers(window);
 
@@ -349,10 +317,6 @@ void render_simpleTest(){
     // run main loop, target real-time simulation and 60 fps rendering
     m_state currentState;
     int controlNum = 0;
-<<<<<<< HEAD
-=======
-    cpMjData(model, mdata, d_init_test);
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
 //    int visualGoalId = mj_name2id(model, mjOBJ_BODY, "display_intermediate");
 //    cout << "visual goal id: " << visualGoalId << endl;
 //
@@ -362,10 +326,7 @@ void render_simpleTest(){
 //    interPose(1) = intermediatePoint(1);
 //
 //    globalMujocoController->setBodyPose(model, mdata, visualGoalId, interPose);
-<<<<<<< HEAD
     cpMjData(model, mdata, optimiser->d_init);
-=======
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
 
     while (!glfwWindowShouldClose(window))
     {
@@ -375,7 +336,6 @@ void render_simpleTest(){
         //  Otherwise add a cpu timer and exit this loop when it is time to render.
         mjtNum simstart = mdata->time;
         while (mdata->time - simstart < 1.0 / 60.0) {
-<<<<<<< HEAD
 
             currentState = optimiser->modelTranslator->returnState(mdata);
             // for (int k = 0; k < NUM_CTRL; k++) {
@@ -389,12 +349,6 @@ void render_simpleTest(){
             // mdata->ctrl[6] += (desiredSpeed - mdata->qvel[6]) * k;
             // std::cout << "current speed: " << mdata->qvel[6] << std::endl;
 
-=======
-            for (int k = 0; k < NUM_CTRL; k++) {
-                mdata->ctrl[k] = testInitControls[controlNum](k);
-                //mdata->ctrl[k] = mdata->qfrc_bias[k];
-            }
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
 
             // if(grippersOpen[controlNum]){
             //     mdata->ctrl[7] = GRIPPERS_OPEN;
@@ -406,12 +360,9 @@ void render_simpleTest(){
             // }
             //cout << "testInitControls[controlNum] " << testInitControls[controlNum] << endl;
 
-<<<<<<< HEAD
             optimiser->modelTranslator->setControls(mdata, testInitControls[controlNum], false);
 
 
-=======
->>>>>>> dabdf0409c02e3ffebf9e0b6ca6baefbef9e6d40
             mj_step(model, mdata);
 
             controlNum++;
